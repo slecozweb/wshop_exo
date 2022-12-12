@@ -31,7 +31,7 @@ class ProductController extends AbstractController
     		$product = new Classes\Product($db, $id);
 
     		if (!empty($product)) {
-    			echo $this->render('product/detail_list.tpl', ['product' => $product]);
+    			echo $this->render('product/detail.tpl', ['product' => $product]);
     		} else {
     			$this->_redirect('product_list.php');
     		}

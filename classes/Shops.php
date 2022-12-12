@@ -1,8 +1,8 @@
 <?php
+
 namespace FwTest\Classes;
 
-// Nom de la classe ProductAction renommée en Product
-class Product
+class Shops
 {
     /**
      * The table name
@@ -10,7 +10,7 @@ class Product
      * @access  protected
      * @var     string
      */
-	protected static $table_name = 'produit';
+    protected static $table_name = 'shops';
 
     /**
      * The primary key name
@@ -18,7 +18,7 @@ class Product
      * @access  protected
      * @var     string
      */
-    protected static $pk_name = 'produit_id';
+    protected static $pk_name = 'id_shop';
 
     /**
      * The object datas
@@ -26,15 +26,15 @@ class Product
      * @access  private
      * @var     array
      */
-	private $_array_datas = array();
-	
+    private $_array_datas = array();
+
     /**
      * The object id
      *
      * @access  private
      * @var     int
      */
-	private $id;
+    private $id;
 
     /**
      * The lang id
@@ -42,7 +42,7 @@ class Product
      * @access  private
      * @var     int
      */
-	private $lang_id = 1;
+    private $lang_id = 1;
 
     /**
      * The link to the database
@@ -50,7 +50,7 @@ class Product
      * @access  public
      * @var     object
      */
-	public $db;
+    public $db;
 
     /**
      * Product constructor.
@@ -60,7 +60,7 @@ class Product
      *
      * @throws Class_Exception
      */
-	public function __construct($db, $datas)
+    public function __construct($db, $datas)
     {
         if (($datas != intval($datas)) && (!is_array($datas))) {
             throw new Class_Exception('The given datas are not valid.');
@@ -71,59 +71,59 @@ class Product
         if (is_array($datas)) {
             $this->_array_datas = array_merge($this->_array_datas, $datas);
         } else {
-            $this->_array_datas[self::$pk_name] = $datas;
+            var_dump("@@");
         }
-	}
+    }
 
     /**
-     * Get the list of product.
+     * Get the list of shops.
      *
      * @param      $db
      * @param      $begin
      * @param      $end
      *
-     * @return     array of Product
+     * @return     array of Shop
      */
-	public static function getAll($db, $begin = 0, $end = 15)
-	{
+    public static function getAll($db, $begin = 0, $end = 15)
+    {
         // Ajout de l'alias "p" manquant dans le FROM
-		$sql_get = "SELECT p.* FROM " . self::$table_name . " p LIMIT " . $begin. ", " . $end;
+        $sql_get = "SELECT p.* FROM " . self::$table_name . " p LIMIT " . $begin. ", " . $end;
 
-		$result = $db->fetchAll($sql_get);
+        $result = $db->fetchAll($sql_get);
 
-		$array_product = [];
+        $array_shop = [];
 
-		if (!empty($result)) {
-			foreach ($result as $product) {
-				$array_product[] = new Product($db, $product);
-			}
-		}
+        if (!empty($result)) {
+            foreach ($result as $shop) {
+                $array_shop[] = new Shops($db, $shop);
+            }
+        }
 
-		return $array_product;
-	}
+        return $array_shop;
+    }
 
     /**
      * Delete a product.
      *
      * @return     bool if succeed
      */
-	public function delete() 
-	{
-		$id = $this->getId();
-		$sql_delete = "DELETE FROM " . self::$table_name . " WHERE " . self::$pk_name . " = ?";
+    public function delete()
+    {
+        $id = $this->getId();
+        $sql_delete = "DELETE FROM " . self::$table_name . " WHERE " . self::$pk_name . " = ?";
 
-		return $this->db->query($sql_delete, $id);
-	}
+        return $this->db->query($sql_delete, $id);
+    }
 
     /**
      * Get the primary key
      *
      * @return     int
      */
-	public function getId()
-	{
-		return $this->_array_datas[self::$pk_name];
-	}
+    public function getId()
+    {
+        return $this->_array_datas[self::$pk_name];
+    }
 
     /**
      * Access properties.
@@ -132,14 +132,18 @@ class Product
      *
      * @return     string
      */
-	public function __get( $param ) {
+    public function __get( $param ) {
 
         $array_datas = $this->_array_datas;
+        //file_put_contents("debug.txt", "-- Start GET  \n", FILE_APPEND);
+        //file_put_contents("debug.txt", "-- GET Data array : ".serialize($array_datas)." \n", FILE_APPEND);
+        //file_put_contents("debug.txt", "-- GET pkname : ".self::$pk_name." \n", FILE_APPEND);
 
         // Let's check if an ID has been set and if this ID is validd
         if ( !empty( $array_datas[self::$pk_name] ) ) {
+            //file_put_contents("debug.txt", "-- Check GET \n", FILE_APPEND);
 
-        	// If it has been set, then try to return the data
+            // If it has been set, then try to return the data
             if ( array_key_exists($param, $array_datas ) ) {
                 return $array_datas[$param];
             }
@@ -166,31 +170,24 @@ class Product
     private function _dispatch()
     {
         $array_datas = $this->_array_datas;
+        file_put_contents("debug.txt", "-- Start Dispatch : \n", FILE_APPEND);
 
         if (empty($array_datas)) {
             return false;
         }
 
-       /*
-        * J'ai rajouté la jointure manquante de la table produit_lang :
-        * LEFT OUTER JOIN produit_lang pl ON pl.produit_lang_id = p.produit_id
-        */
-        $sql_dispatch = "SELECT p.*, 
-                                IF (produit_lang_titreobjet IS NULL, produit_titreobjet, produit_lang_titreobjet) produit_titreobjet,
-                                IF (produit_lang_nom IS NULL, produit_nom, produit_lang_nom) produit_nom,
-                                IF (produit_lang_description IS NULL, produit_description, produit_lang_description) produit_description
-            FROM produit p
-            LEFT OUTER JOIN produit_lang pl ON pl.produit_lang_id = p.produit_id 
-            AND pl.fk_lang_id = :lang_id
-            WHERE p.produit_id = :produit_id;";
+        /*
+         */
+        $sql_dispatch = "SELECT s.*, 
+            FROM shop s
+            WHERE s.shop_id = :id_shop;";
 
         /*
          * J'ai rajouté un Bind pour la variable lang_id :
          * 'lang_id' => 1,
          */
         $params = [
-            'lang_id' => $this->lang_id,
-            'produit_id' => intval($array_datas['produit_id'])
+            'id_shop' => intval($array_datas['id_shop'])
         ];
 
         $array_product = $this->db->fetchRow($sql_dispatch, $params);
@@ -203,5 +200,4 @@ class Product
 
         return false;
     }
-
 }

@@ -51,6 +51,9 @@ class Database
     {
         $this->object = new \PDO('mysql:host=' . $this->host . ';port=' . $this->port . ';dbname=' . $this->database, $this->user, $this->password);
         $this->object->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
+        $this->object->query('SET NAMES \'utf8\' COLLATE \'utf8_unicode_ci\'');
+		$this->object->query('SET CHARACTER SET utf8');
+
     }
 
     public function query($sql, $arrayAttributes = [])
@@ -75,9 +78,11 @@ class Database
             return false;
         }
 
-        if (!$prepare->executeSql($arrayAttributes)) {
+        // Correction de l'appel de la fonction executeSql en execute
+        if (!$prepare->execute($arrayAttributes)) {
             $this->prepare = $prepare;
-            return false
+            // Correction du ; manquant en fin d'instruction
+            return false;
         }
 
         $data = $prepare->fetchAll(\PDO::FETCH_ASSOC);
@@ -113,6 +118,9 @@ class Database
             return false;
         }
 
+        //file_put_contents("debug.txt", "-- SQL : ".$sql."\n", FILE_APPEND);
+        //file_put_contents("debug.txt", "Params : ".serialize($arrayAttributes)."\n", FILE_APPEND);
+
         if (!$prepare->execute($arrayAttributes)) {
             $this->prepare = $prepare;
             return false;
@@ -122,5 +130,33 @@ class Database
         $this->prepare = $prepare;
 
         return $data;
+    }
+
+    public function add ($sql, $arrayAttributes = []) {
+        $prepare = $this->object->prepare($sql);
+
+        if (!$prepare) {
+            return false;
+        }
+
+        if (!$prepare->execute($arrayAttributes)) {
+            $this->prepare = $prepare;
+            return false;
+        }
+
+    }
+
+    public function del ($sql, $arrayAttributes = []) {
+        $prepare = $this->object->prepare($sql);
+
+        if (!$prepare) {
+            return false;
+        }
+
+        if (!$prepare->execute($arrayAttributes)) {
+            $this->prepare = $prepare;
+            return false;
+        }
+
     }
 }
